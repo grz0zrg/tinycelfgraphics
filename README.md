@@ -44,7 +44,7 @@ There is also the `-march=` GCC option which can have varying result with ~2 byt
 
 `strace` is usefull on optimized binary to see any problems with the syscall
 
-## Graphics output
+## Graphics output
 
 Several methods are used to output graphics, of which :
 
@@ -96,7 +96,7 @@ The generated binary res / bit depth should match the framebuffer settings in or
 * 240 bytes optimized
 * 182 bytes optimized + compressed
 
-### SDL
+### SDL
 
 This use the SDL library to output graphics data. (white centered pixel)
 
@@ -115,7 +115,7 @@ Switching to 32 bits ELF actually free some more bytes :
 
 * 374 bytes
 
-### SDL2
+### SDL2
 
 This use the SDL2 library to output graphics data. (white centered pixel)
 
@@ -126,7 +126,7 @@ Unless the SDL version this one doesn't seem to require any additional setup to 
 * 1073 bytes optimized
 * 456 bytes optimized + compressed
 
-### Clutter (accelerated)
+### Clutter (accelerated)
 
 This use the Clutter libary to output graphics data through a GLSL fragment shader. (white screen)
 
@@ -141,7 +141,7 @@ Didn't try the 32 bits version but this probably save some more bytes.
 
 A good source of fragment shaders to learn from is [Shadertoy](https://www.shadertoy.com)
 
-### Framebuffer + pure assembly
+### Framebuffer + pure assembly
 
 64 bits assembly program that use the framebuffer device `/dev/fb0` (fbdev) to output graphics data. (white centered pixel)
 
