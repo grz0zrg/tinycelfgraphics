@@ -48,22 +48,6 @@ inline static unsigned int *sys_mmap(unsigned int *addr, unsigned long length, u
 #endif
 }
 
-inline static size_t sys_write(int fd, const void *buf, size_t size) {
-    size_t r;
-#ifdef __x86_64
-    __asm__ volatile("syscall"
-        : "=a" (r)
-        : "0"(__NR_write), "D"(fd), "S"(buf), "d"(size)
-        : "rcx", "r11", "memory");
-#else
-    __asm__ volatile("int $0x80"
-        : "=a" (r)
-        : "0"(__NR_write), "b"(fd), "c"(buf), "d"(size)
-        : "memory");
-#endif
-    return r;
-}
-
 void _start() {
     int fbfd = sys_open("/dev/fb0", O_RDWR, 0);
     unsigned int *buffer = (unsigned int *)sys_mmap(0, FRAMEBUFFER_LENGTH, PROT_READ|PROT_WRITE, MAP_SHARED, fbfd);
