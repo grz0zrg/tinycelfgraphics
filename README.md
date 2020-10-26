@@ -96,6 +96,8 @@ The generated binary res / bit depth should match the framebuffer settings in or
 * 240 bytes optimized
 * 182 bytes optimized + compressed
 
+Note : 176 bytes by removing null syscall parameters, this is probably safe on x86-64 but i don't know if it is safe for x86 platforms so i let that out.
+
 ### SDL
 
 This use the SDL library to output graphics data. (white centered pixel)
@@ -152,7 +154,7 @@ This respect the ELF specification; better gains (~36 bytes) can be achieved by 
 * 196 bytes
 * 173 bytes compressed
 
-This is only ~9 bytes less than the C version!
+This is only ~9 bytes less than the C version! (and 3 bytes if syscall null values are discarded in the C program)
 
 ### More
 
