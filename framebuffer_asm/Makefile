@@ -8,6 +8,8 @@ all: build
 	cat unpack_lzma.header $(NAME).lzma > $(NAME)
 	chmod +x $(NAME)
 	rm $(NAME).lzma
+	# remove CRC32 (4 bytes)
+	truncate -s -4 $(NAME)
 	wc -c $(NAME)
 
 build:
