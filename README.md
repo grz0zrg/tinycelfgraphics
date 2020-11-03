@@ -99,6 +99,8 @@ The generated binary res / bit depth should match the framebuffer settings in or
 Note : 
 
 * 176 bytes by removing null syscall parameters, this is probably safe on x86-64 but i don't know if it is safe for x86 platforms so i let that out.
+* for static graphics (procedural) some bytes can be gained by using a static buffer + call to single write syscall + adjusting the shell script to output to /dev/fb0 just like the "file output" example
+* it is probably better (~10 bytes gain) to output a .o and assemble a binary with the smallest ELF header + generated binary code, this may have some gains and the advantage of complete control on the ELF header, a complete example is available [here](http://mainisusuallyafunction.blogspot.com/2015/01/151-byte-static-linux-binary-in-rust.html) (Rust but the core idea can be adapted to C easily)
 
 ### SDL
 
@@ -160,4 +162,4 @@ This is only ~13 bytes less than the C version! (and ~7 bytes if syscall null va
 
 ### More
 
-Some more bytes can be gained by tweaking the ELF header, automatic tools [exists](https://git.titandemo.org/PoroCYon/norjohe/-/tree/master/src) to do that.
+Some more bytes can be gained by tweaking the ELF header (ex. by using the ELF padding field for static data, this doesn't provide advantages sometimes due to compression doing a better job!), automatic tools doing overlapping header things also [exists](https://git.titandemo.org/PoroCYon/norjohe/-/tree/master/src).
