@@ -108,7 +108,7 @@ Note :
 * for static graphics (procedural) some bytes can be gained by using a static buffer + call to single write syscall + adjusting the shell script to output to /dev/fb0 just like the "file output" example
 * it is probably better (~10 bytes gain) to output a .o and assemble a binary with the smallest ELF header + generated binary code, this may have some gains and the advantage of complete control on the ELF header, a complete example is available [here](http://mainisusuallyafunction.blogspot.com/2015/01/151-byte-static-linux-binary-in-rust.html) (Rust but the core idea can be adapted to C easily)
 
-## Framebuffer with custom 64 bits ELF headers
+### Framebuffer with custom 64 bits ELF headers
 
 Same as before with a custom 64 bits assembly ELF header, probably the best of all executables due to flexibility (advantage of C code + hand made ELF header customizations). Can be adapted for file output.
 
