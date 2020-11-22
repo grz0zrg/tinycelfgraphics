@@ -7,13 +7,13 @@ The goal was to build a collection of very small standalone Linux graphics progr
 
 The rules was to be able to output & view graphics data, it also should be able to quit properly using Ctrl+C (SIGINT)
 
-All of them compile down to less than 512 bytes with some less than 256 bytes (182 bytes to be exact excluding ASM version)
+All of them compile down to less than 512 bytes with some less than 256 bytes (182 bytes to be exact excluding ASM version and unsafe fb version with custom ELF headers (164 bytes))
 
-There is only one pure assembly framebuffer program to show how all of this compete against pure assembly and compliant ELF (maybe one could reach < 128b by dropping compliance) [credits](https://www.muppetlabs.com/~breadbox/software/tiny/return42.html)
+There is only one pure assembly framebuffer program to show how all of this compete against pure assembly and 'compliant' ELF (maybe one could reach < 128b by dropping compliance) [credits](https://www.muppetlabs.com/~breadbox/software/tiny/return42.html)
 
 It borrow several tricks from several sources mainly coming from the [Demoscene](https://en.wikipedia.org/wiki/Demoscene)
 
-All C programs work in either 64 bits or 32 bits (must append `-m32` to GCC flags), 32 bits programs may be bigger or smaller.
+All pure C programs work in either 64 bits or 32 bits (must append `-m32` to GCC flags), 32 bits programs may be bigger or smaller.
 
 This was used for my [Twigs](https://github.com/grz0zrg/twigs) 512 bytes procedural graphics intro.
 
@@ -24,6 +24,8 @@ Just go into any directory then into `src` directory and type `sh build.sh` this
 This was built with **GCC 7.5.0**
 
 ## How
+
+applicable to all except C + custom ELF header and ASM version :
 
 * using GCC compiler optimizations through compiler flags (see Makefile of each programs)
 * `-nostartfiles -nodefaultlibs` linker options among others (don't link to libc / don't use default startup code)
@@ -38,11 +40,15 @@ Some details / credits about the optimizations can be gathered [here](https://in
 
 If the compression / shell script may feel like cheating one can still compile some programs (framebuffer, file) down to less than 256 bytes for file / fbdev output.
 
-There is still some room to remove some bytes if one don't care about clearing the terminal output or exiting properly. (~11 bytes saved)
+There is still some room to remove some bytes if one don't care about clearing the terminal output or exiting properly. (~11 bytes to most)
 
 There is also the `-march=` GCC option which can have varying result with ~2 bytes gain.
 
+When compressed changing some constants can sometimes lead to some gain (depend on content), for example switching some fields of the ELF header to 0 can lead to ~8 bytes gain, this may be no more ELF compliant though.
+
 `strace` is usefull on optimized binary to see any problems with the syscall
+
+There is also a framebuffer version with GCC output + custom ELF headers merged together to form a small binary.
 
 ## Graphics output
 
@@ -99,6 +105,26 @@ The generated binary res / bit depth should match the framebuffer settings in or
 Note : 
 
 * 176 bytes by removing null syscall parameters, this is probably safe on x86-64 but i don't know if it is safe for x86 platforms so i let that out.
+
+## Framebuffer with custom 64 bits ELF headers
+
+Same as before with a custom 64 bits assembly ELF header, probably the best of all executables due to flexibility (advantage of C code + hand made ELF header customizations). Can be adapted for file output.
+
+How ? The program is compiled with GCC (optimized), a binary blob (without headers) is then extracted and included inside a custom ELF header compiled with NASM, the result is then compressed.
+
+There is some potentially unsafe shortcuts compared to others such as :
+
+* ELF padding / ABI target / version field is used to store the framebuffer device (/dev/fb0) string, using the padding field is safe but there is still doubts about the ABI field
+* Syscalls null arguments are discarded (see `fb.c` comments), this rely on the asumption that all registers are set to 0 when the program start.
+
+64 bits ELF result :
+
+* 171 bytes optimized
+* 164 bytes optimized + compressed
+
+32 bits version is not available yet but this shouldn't be too hard to convert.
+
+Original idea / implementation come from [this article](http://mainisusuallyafunction.blogspot.com/2015/01/151-byte-static-linux-binary-in-rust.html)
 
 ### SDL
 
@@ -158,6 +184,8 @@ This respect the ELF specification; better gains (~36 bytes) can be achieved by 
 
 This is only ~13 bytes less than the C version! (and ~7 bytes if syscall null values are discarded in the C program)
 
+Note : this is the same size as the Framebuffer custom ELF, there is some small size differences due to the added loop.
+
 ### More
 
-Some more bytes can be gained by tweaking the ELF header, automatic tools [exists](https://git.titandemo.org/PoroCYon/norjohe/-/tree/master/src) to do that.
+Some more bytes can be gained by tweaking the ELF header, this can be highly tricky / unsafe.
