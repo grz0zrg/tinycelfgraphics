@@ -34,6 +34,13 @@ phdr:
 
 phdrsize equ  $ - phdr
 
+; any data can also go here and are accessible in the C code through pointers but the 'entry' should be correcty uppdated (see Makefile) so it must have an offset added corresponding to the size of the data
+; note : if you use float constants in your C code, youll most likely want to load them from here manually through pointers address
+;        because float constants are loaded from memory and since we don't use any sections any float constants will vanish from the resulting binary
+;        unless they are defined here and referenced via pointers in the C code
+
+; dd 0.5
+
 incbin "payload.bin"
 
 filesize equ $ - ehdr

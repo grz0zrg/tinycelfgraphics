@@ -7,7 +7,7 @@ The goal was to build a collection of very small standalone Linux graphics progr
 
 The rules was to be able to output & view graphics data, it also should be able to quit properly using Ctrl+C (SIGINT)
 
-All of them compile down to less than 512 bytes with some less than 256 bytes (182 bytes to be exact excluding ASM version and unsafe fb version with custom ELF headers (164 bytes))
+All of them compile down to less than 512 bytes with some less than 256 bytes (182 bytes to be exact excluding ASM version and unsafe fb version with custom ELF headers (158 bytes!))
 
 There is only one pure assembly framebuffer program to show how all of this compete against pure assembly and 'compliant' ELF (maybe one could reach < 128b by dropping compliance) [credits](https://www.muppetlabs.com/~breadbox/software/tiny/return42.html)
 
@@ -16,6 +16,20 @@ It borrow several tricks from several sources mainly coming from the [Demoscene]
 All pure C programs work in either 64 bits or 32 bits (must append `-m32` to GCC flags), 32 bits programs may be bigger or smaller.
 
 This was used for my [Twigs](https://github.com/grz0zrg/twigs) 512 bytes procedural graphics intro.
+
+The best method for anything real-time is probably the "Framebuffer with custom ELF headers" (generated binary size is the same as pure assembly and it allow more controls over the ELF header)
+
+## Why
+
+Fun, portability, readability, accessibility.
+
+It is mainly targeted at [sizecoding](http://www.sizecoding.org/wiki/Main_Page) stuff. (art of creating very tiny programs)
+
+Portability : There is some inline assembly but it is still way more portable than pure assembly.
+Readability : Not always true but generally it is, when doing sizecoding the code can get pretty weird / cryptic, with C it is more straightforward.
+Accessibility : Allow to get into sizecoding quickly with common programming language.
+
+As a major downside there is less controls over the generated code and maybe some odd behaviors due to compiler bugs etc.
 
 ## Build
 
@@ -48,7 +62,7 @@ When compressed changing some constants can sometimes lead to some gain (depend 
 
 `strace` is usefull on optimized binary to see any problems with the syscall
 
-There is also a framebuffer version with GCC output + custom ELF headers merged together to form a small binary.
+There is also a framebuffer version with GCC output + custom ELF headers merged together to form a small binary, it is probably the best of all methods here.
 
 ## Graphics output
 
@@ -66,7 +80,7 @@ Framebuffer / file output is probably the most compatible option followed by SDL
 
 ## Sound output
 
-There is no sound output on the provided samples but it can be added easily by using `aplay` in the shell script (and piping data to it such as obviously `/dev/random`)
+There is no sound output on the provided examples but it can be added easily by using `aplay` in the shell script (and piping data to it such as obviously `/dev/random`)
 
 ### File output
 
@@ -106,25 +120,27 @@ Note :
 
 * 176 bytes by removing null syscall parameters, this is probably safe on x86-64 but i don't know if it is safe for x86 platforms so i let that out.
 * for static graphics (procedural) some bytes can be gained by using a static buffer + call to single write syscall + adjusting the shell script to output to /dev/fb0 just like the "file output" example
-* it is probably better (~10 bytes gain) to output a .o and assemble a binary with the smallest ELF header + generated binary code, this may have some gains and the advantage of complete control on the ELF header, a complete example is available [here](http://mainisusuallyafunction.blogspot.com/2015/01/151-byte-static-linux-binary-in-rust.html) (Rust but the core idea can be adapted to C easily)
 
 ## Framebuffer with custom 64 bits ELF headers
 
-Same as before with a custom 64 bits assembly ELF header, probably the best of all executables due to flexibility (advantage of C code + hand made ELF header customizations). Can be adapted for file output.
+Same as before with a custom 64 bits assembly ELF header, probably the best of all methods due to flexibility and size of generated binary. Can be adapted for file output.
 
-How ? The program is compiled with GCC (optimized), a binary blob (without headers) is then extracted and included inside a custom ELF header compiled with NASM, the result is then compressed.
+The main advantage over all methods here is : C code + hand made ELF header customizations / complete controls
+The main disadvantage is : it can be harder to use since some sections like .rodata are left out so for example any float constants in C code don't work as-is, they must be defined somewhere in the assembly code and referenced in C code through pointers (see sources) if you only use integers in your program it should work as-is.
 
-There is some potentially unsafe shortcuts compared to others such as :
+How ? The program is compiled with GCC (with optimization flags), a binary blob (without headers) is then extracted and included inside a custom ELF header compiled with NASM, the result is then compressed.
+
+There is some potentially unsafe shortcuts compared to others (they are not mandatory) such as :
 
 * ELF padding / ABI target / version field is used to store the framebuffer device (/dev/fb0) string, using the padding field is safe but there is still doubts about the ABI field
 * Syscalls null arguments are discarded (see `fb.c` comments), this rely on the asumption that all registers are set to 0 when the program start.
 
-64 bits ELF result :
+64 bits ELF result (1920x1080) :
 
 * 171 bytes optimized
-* 164 bytes optimized + compressed
+* 158 bytes optimized + compressed
 
-32 bits version is not available yet but this shouldn't be too hard to convert.
+32 bits version does not work yet. (crashing, why ?)
 
 Original idea / implementation come from [this article](http://mainisusuallyafunction.blogspot.com/2015/01/151-byte-static-linux-binary-in-rust.html)
 
