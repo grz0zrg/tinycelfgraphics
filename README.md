@@ -121,7 +121,7 @@ Note :
 * 176 bytes by removing null syscall parameters, this is probably safe on x86-64 but i don't know if it is safe for x86 platforms so i let that out.
 * for static graphics (procedural) some bytes can be gained by using a static buffer + call to single write syscall + adjusting the shell script to output to /dev/fb0 just like the "file output" example
 
-## Framebuffer with custom 64 bits ELF headers
+### Framebuffer with custom 64 bits ELF headers
 
 Same as before with a custom 64 bits assembly ELF header, probably the best of all methods due to flexibility and size of generated binary. Can be adapted for file output.
 
