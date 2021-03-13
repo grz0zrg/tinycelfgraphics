@@ -19,7 +19,7 @@ This was used for my [Twigs](https://github.com/grz0zrg/twigs) 512 bytes procedu
 
 The best method for anything real-time is probably the "Framebuffer with custom ELF headers" (generated binary size is the same as pure assembly and it allow more controls over the ELF header)
 
-## Why
+## Why
 
 Fun, portability, readability, accessibility.
 
@@ -143,6 +143,8 @@ There is some potentially unsafe shortcuts compared to others (they are not mand
 32 bits version does not work yet. (crashing, why ?)
 
 Original idea / implementation come from [this article](http://mainisusuallyafunction.blogspot.com/2015/01/151-byte-static-linux-binary-in-rust.html)
+
+Note : The resulting binary can be disassembled with `objdump -b binary -D -m i386:x86-64 binary_name`
 
 ### SDL
 
