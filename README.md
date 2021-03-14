@@ -25,9 +25,9 @@ Fun, portability, readability, accessibility.
 
 It is mainly targeted at [sizecoding](http://www.sizecoding.org/wiki/Main_Page) stuff. (art of creating very tiny programs)
 
-Portability : There is some inline assembly but it is still way more portable than pure assembly.
-Readability : Not always true but generally it is, when doing sizecoding the code can get pretty weird / cryptic, with C it is more straightforward.
-Accessibility : Allow to get into sizecoding quickly with common programming language.
+* Portability : There is some inline assembly but it is still way more portable than pure assembly.
+* Readability : Not always true but generally it is, when doing sizecoding the code can get pretty weird / cryptic, with C it is more straightforward.
+* Accessibility : Allow to get into sizecoding quickly with common programming language.
 
 As a major downside there is less controls over the generated code and maybe some odd behaviors due to compiler bugs etc.
 
