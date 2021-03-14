@@ -126,6 +126,7 @@ Note :
 Same as before with a custom 64 bits assembly ELF header, probably the best of all methods due to flexibility and size of generated binary. Can be adapted for file output.
 
 The main advantage over all methods here is : C code + hand made ELF header customizations / complete controls
+
 The main disadvantage is : it can be harder to use since some sections like .rodata are left out so for example any float constants in C code don't work as-is, they must be defined somewhere in the assembly code and referenced in C code through pointers (see sources) if you only use integers in your program it should work as-is.
 
 How ? The program is compiled with GCC (with optimization flags), a binary blob (without headers) is then extracted and included inside a custom ELF header compiled with NASM, the result is then compressed.
