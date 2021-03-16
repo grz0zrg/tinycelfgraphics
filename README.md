@@ -210,3 +210,5 @@ Note : this is the same size as the Framebuffer custom ELF, there is some small 
 ### More
 
 Some more bytes can be gained by tweaking the ELF header, this can be highly tricky / unsafe.
+
+GCC version could also influence the final size (for the examples above recent GCC versions (up to 11) does not affect the binary size)
