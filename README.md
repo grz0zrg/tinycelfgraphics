@@ -9,13 +9,13 @@ The rules was to be able to output & view graphics data, it also should be able 
 
 All of them compile down to less than 512 bytes with some less than 256 bytes and one (32 bits only) less than 128 bytes
 
-There is only one pure assembly framebuffer program to show how all of this compete against pure assembly and 'compliant' ELF (maybe one could reach < 128b by dropping compliance) [credits](https://www.muppetlabs.com/~breadbox/software/tiny/return42.html)
+There is only one 100% assembly framebuffer program to show how all of this compete against pure assembly and 'compliant' ELF [credits](https://www.muppetlabs.com/~breadbox/software/tiny/return42.html)
 
 It borrow several tricks from several sources mainly coming from the [Demoscene](https://en.wikipedia.org/wiki/Demoscene)
 
 All pure C programs work in either 64 bits or 32 bits (must append `-m32` to GCC flags), 32 bits programs may be bigger or smaller.
 
-This was used for my [Twigs](https://github.com/grz0zrg/twigs) 512 bytes procedural graphics intro.
+This was used for my [Twigs](https://github.com/grz0zrg/twigs) 512 bytes procedural graphics intro and [TrueSpace](https://github.com/grz0zrg/TrueSpace) 256 bytes intro.
 
 The best method for anything real-time is probably the "Framebuffer with custom ELF headers" (generated binary size is the same as pure assembly and it allow more controls over the ELF header)
 
