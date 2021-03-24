@@ -41,10 +41,10 @@ all:
 	# build the final binary from the binary and custom ELF header
 	nasm -f bin -o $(NAME) -D entry=0x$(ENTRY) elf$(BITS).s
 	wc -c $(NAME)
-	# comment the following two lines if you want raw ELF file (no stub / shell script / LZMA compression)
-	lzma $(LZMA_ARGS) $(NAME)
-	cat unpack_lzma.header $(NAME).lzma > $(NAME)
-	truncate -s -4 $(NAME)
+	# comment the following three lines if you want raw ELF file (no stub / shell script / LZMA compression)
+	#lzma $(LZMA_ARGS) $(NAME)
+	#cat unpack_lzma.header $(NAME).lzma > $(NAME)
+	#truncate -s -4 $(NAME)
 	chmod +x $(NAME)
 	rm -f $(NAME).lzma
 	rm -f payload

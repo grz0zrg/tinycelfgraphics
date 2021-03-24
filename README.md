@@ -7,7 +7,7 @@ The goal was to build a collection of very small standalone Linux graphics progr
 
 The rules was to be able to output & view graphics data, it also should be able to quit properly using Ctrl+C (SIGINT)
 
-All of them compile down to less than 512 bytes with some less than 256 bytes (182 bytes to be exact excluding ASM version and unsafe fb version with custom ELF headers (158 bytes!))
+All of them compile down to less than 512 bytes with some less than 256 bytes and one (32 bits only) less than 128 bytes
 
 There is only one pure assembly framebuffer program to show how all of this compete against pure assembly and 'compliant' ELF (maybe one could reach < 128b by dropping compliance) [credits](https://www.muppetlabs.com/~breadbox/software/tiny/return42.html)
 
@@ -121,13 +121,15 @@ Note :
 * 176 bytes by removing null syscall parameters, this is probably safe on x86-64 but i don't know if it is safe for x86 platforms so i let that out.
 * for static graphics (procedural) some bytes can be gained by using a static buffer + call to single write syscall + adjusting the shell script to output to /dev/fb0 just like the "file output" example
 
-### Framebuffer with custom 64 bits ELF headers
+### Framebuffer with custom 32 / 64 bits ELF headers
 
-Same as before with a custom 64 bits assembly ELF header, probably the best of all methods due to flexibility and size of generated binary. Can be adapted for file output.
+Same as before with a custom 32 / 64 bits assembly ELF header, probably the best of all methods due to flexibility and size of generated binary. Can be adapted for file output easily.
 
 The main advantage over all methods here is : C code + hand made ELF header customizations / complete controls
 
-The main disadvantage is : it can be harder to use since some sections like .rodata are left out so for example any float constants in C code don't work as-is, they must be defined somewhere in the assembly code and referenced in C code through pointers (see sources) if you only use integers in your program it should work as-is.
+The main disadvantage is : it can be harder to use since some sections like .rodata are left out so for example any float constants in C code don't work as-is, they must be defined somewhere in the assembly code and referenced in C code through pointers (see sources) **if you only use integers** in your program it should work as-is.
+
+Another (small) disadvantage is portability.
 
 How ? The program is compiled with GCC (with optimization flags), a binary blob (without headers) is then extracted and included inside a custom ELF header compiled with NASM, the result is then compressed.
 
@@ -136,16 +138,46 @@ There is some potentially unsafe shortcuts compared to others (they are not mand
 * ELF padding / ABI target / version field is used to store the framebuffer device (/dev/fb0) string, using the padding field is safe but there is still doubts about the ABI field
 * Syscalls null arguments are discarded (see `fb.c` comments), this rely on the asumption that all registers are set to 0 when the program start.
 
+32 bits ELF result (1920x1080) :
+
+* 165 bytes optimized
+* 196 bytes optimized + compressed (why ?)
+
 64 bits ELF result (1920x1080) :
 
 * 171 bytes optimized
-* 158 bytes optimized + compressed
-
-32 bits version does not work yet. (crashing, why ?)
+* 164 bytes optimized + compressed (153 bytes if the console isn't cleared / program doesn't exit properly)
 
 Original idea / implementation come from [this article](http://mainisusuallyafunction.blogspot.com/2015/01/151-byte-static-linux-binary-in-rust.html)
 
-Note : The resulting binary can be disassembled with `objdump -b binary -D -m i386:x86-64 binary_name`
+Note : Non compressed version does not quit properly
+
+Note : See `build.sh` to target 32 or 64 bits platform (run it twice if you switch because there is some unsolved issues in how variables are handled in the makefile)
+
+Note : The resulting 64 bits binary can be disassembled with `objdump -b binary -D -m i386:x86-64 binary_name`
+
+### Framebuffer with custom ELF headers + fields overlap
+
+Same as before except some ELF header fields are overlapped (31 bytes gain for 64 bits version)
+
+Note : This does not respect the ELF specification so potentially unsafe.
+
+Note : 32 bits version goes further than just overlapping headers by integrating bits of [Whirlwind Tutorial](http://www.muppetlabs.com/~breadbox/software/tiny/teensy.html)
+Note : 32 bits version is potentially more unsafe than 64 bits due to some shortcuts (e_sh* values are actual code + fb0 string null byte on e_ehsize)
+
+32 bits ELF result (1920x1080) :
+
+* **127 bytes** optimized
+* 180 bytes optimized + compressed
+
+64 bits ELF result (1920x1080) :
+
+* 140 bytes optimized
+* 159 bytes optimized + compressed (148 bytes if the console isn't cleared / program doesn't exit properly)
+
+Note : Compression does not seem to help at this point so it is disabled by default. (see `Makefile` to enable it)
+
+Note : Maybe some more bytes can be gained for the 32 bits version by hand coding some stuff in assembly but at this point it is probably better to go for pure assembly. :)
 
 ### SDL
 
@@ -209,6 +241,6 @@ Note : this is the same size as the Framebuffer custom ELF, there is some small 
 
 ### More
 
-Some more bytes can be gained by tweaking the ELF header, this can be highly tricky / unsafe.
+Some more bytes can be gained by tweaking the ELF header (see overlap example), this can be highly tricky / unsafe.
 
 GCC version could also influence the final size (for the examples above recent GCC versions (up to 11) does not affect the binary size)
