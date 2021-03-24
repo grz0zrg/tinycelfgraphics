@@ -23,7 +23,8 @@ all:
 	# ugly 'fix' from seabios for newer version of ld which will fail when linking one executable to another (see: http://sourceware-org.1504.n7.nabble.com/recent-ld-built-for-x86-64-fails-to-accept-16bit-code-as-input-seabios-build-td641750.html)
 	# original comment: Change e_type to ET_REL so that it can be used to link. Unlike GNU ld, lld does not allow an ET_EXEC input.
 	# ld 2.30 does not have the problem but 2.36.1 does
-	# NOTE : the entry point may change due to that and it result in a crash on my machine (vs ld 2.30); don't know yet how to fix it cleanly... maybe check if that fix can be avoided ?
+	# NOTE : the entry point may change due to that so $(ENTRY) below is completely wrong and it result in a crash on my machine (vs ld 2.30)
+	#        don't know yet how to fix it cleanly except by just defining $(ENTRY) to be the address defined in the ld script (padded)... maybe check if that fix can be avoided ?
 	#printf '\1' | dd of=$(NAME) conv=notrunc bs=1 seek=16 status=none
 	# source : http://mainisusuallyafunction.blogspot.com/2015/01/151-byte-static-linux-binary-in-rust.html
 	# 'smash all the sections together, with no alignment padding, then extract that section as a headerless binary blob'

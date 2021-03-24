@@ -129,7 +129,7 @@ The main advantage over all methods here is : C code + hand made ELF header cust
 
 The main disadvantage is : it can be harder to use since some sections like .rodata are left out so for example any float constants in C code don't work as-is, they must be defined somewhere in the assembly code and referenced in C code through pointers (see sources) **if you only use integers** in your program it should work as-is.
 
-Another (small) disadvantage is portability.
+Another (small) disadvantage is less portability.
 
 How ? The program is compiled with GCC (with optimization flags), a binary blob (without headers) is then extracted and included inside a custom ELF header compiled with NASM, the result is then compressed.
 
@@ -162,8 +162,7 @@ Same as before except some ELF header fields are overlapped (31 bytes gain for 6
 
 Note : This does not respect the ELF specification so potentially unsafe.
 
-Note : 32 bits version goes further than just overlapping headers by integrating bits of [Whirlwind Tutorial](http://www.muppetlabs.com/~breadbox/software/tiny/teensy.html)
-Note : 32 bits version is potentially more unsafe than 64 bits due to some shortcuts (e_sh* values are actual code + fb0 string null byte on e_ehsize)
+Note : 32 bits version goes further than just overlapping headers by integrating bits of [Whirlwind Tutorial](http://www.muppetlabs.com/~breadbox/software/tiny/teensy.html) it is also maybe more unsafe than 64 bits due to some shortcuts (e_sh* values are actual code + fb0 string null byte on e_ehsize)
 
 32 bits ELF result (1920x1080) :
 
@@ -175,9 +174,9 @@ Note : 32 bits version is potentially more unsafe than 64 bits due to some short
 * 140 bytes optimized
 * 159 bytes optimized + compressed (148 bytes if the console isn't cleared / program doesn't exit properly)
 
-Note : Compression does not seem to help at this point so it is disabled by default. (see `Makefile` to enable it)
+Compression does not seem to help anymore so it is disabled by default. (see `Makefile` to enable it)
 
-Note : Maybe some more bytes can be gained for the 32 bits version by hand coding some stuff in assembly but at this point it is probably better to go for pure assembly. :)
+Maybe some more bytes can be gained for the 32 bits version by hand coding some stuff in assembly but at this point it is probably better to go for pure assembly. :)
 
 ### SDL
 
