@@ -176,6 +176,8 @@ Note : 32 bits version goes further than just overlapping headers by integrating
 
 Compression does not seem to help anymore so it is disabled by default. (see `Makefile` to enable it)
 
+Note : Some potentially unsafe tricks can be used to gain ~4 bytes for the 32 bits ELF by tweaking the `sys_mmap` function (no push / pop + single movl and one arg) bringing the 32 bits ELF to around **123 bytes**
+
 Maybe some more bytes can be gained for the 32 bits version by hand coding some stuff in assembly but at this point it is probably better to go for pure assembly. :)
 
 ### SDL
