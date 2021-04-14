@@ -7,7 +7,7 @@ The goal was to build a collection of very small standalone Linux graphics progr
 
 The rules was to be able to output & view graphics data, it also should be able to quit properly using Ctrl+C (SIGINT)
 
-All of them compile down to less than 512 bytes with some less than 256 bytes and one (32 bits only) less than 128 bytes
+All of them compile down to less than 512 bytes with some less than 256 bytes and two (32 bits only) less than 128 bytes (85 bytes !)
 
 There is only one 100% assembly framebuffer program to show how all of this compete against pure assembly and 'compliant' ELF [credits](https://www.muppetlabs.com/~breadbox/software/tiny/return42.html)
 
@@ -176,7 +176,21 @@ Note : 32 bits version goes further than just overlapping headers by integrating
 
 Compression does not seem to help anymore so it is disabled by default. (see `Makefile` to enable it)
 
-Maybe some more bytes can be gained for the 32 bits version by hand coding some stuff in assembly but at this point it is probably better to go for pure assembly. :)
+Some more bytes can be gained for the 32 bits version by hand coding some stuff in assembly (see next) but at this point it is probably better to go for pure assembly. :)
+
+### Framebuffer with custom ELF headers + fields overlap + x86 framebuffer init
+ 
+Same as before except the framebuffer initialization (fopen / mmap calls) is hand coded; 32 bits x86 only
+
+32 bits ELF result (1920x1080) :
+
+* **85 bytes**
+
+It use optimized framebuffer initialization code from [lintro](https://www.pouet.net/prod.php?which=58560) a 128 bytes intro by frag/fsqrt
+
+This is probably one of the tiniest a C fbdev program can be although there is still some tricks to gain ~3 bytes such as changing entry point (see [lintro sources](https://www.pouet.net/prod.php?which=58560))
+
+Ideal for 128 bytes intro although at this point it is probably better to ditch C and do pure assembly :)
 
 ### SDL
 
