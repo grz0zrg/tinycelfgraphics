@@ -280,7 +280,7 @@ This is only ~13 bytes less than the C version! (and ~7 bytes if syscall null va
 
 Note : this is the same size as the Framebuffer custom ELF, there is some small size differences due to the added loop.
 
-Conclusion : For 128b / 256b programs GCC can do a sufficient job but it highly depend on the code, GCC may use the stack heavily which is sometimes not good for sizecoding, it will not beat hand optimized assembly which may at least have 25% less size.
+Conclusion : For 128b / 256b programs GCC can do a sufficient job but it highly depend on the code, GCC may use the stack heavily which is sometimes not good for sizecoding, it will not beat hand optimized assembly which may at least have 25% less bytes.
 
 ### More
 
