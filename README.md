@@ -15,9 +15,11 @@ It borrow several tricks from several sources mainly coming from the [Demoscene]
 
 All pure C programs work in either 64 bits or 32 bits (must append `-m32` to GCC flags), 32 bits programs may be bigger or smaller.
 
-This was used for my [Twigs](https://github.com/grz0zrg/twigs) 512 bytes procedural graphics intro and [TrueSpace](https://github.com/grz0zrg/TrueSpace) 256 bytes intro.
+This was used for [my procedural graphics 128b/256b intro](https://www.pouet.net/groups.php?which=15005) although some are pure assembly.
 
-The best method for anything real-time is probably the "Framebuffer with custom ELF headers" (generated binary size is the same as pure assembly and it allow more controls over the ELF header)
+The best method for anything real-time is probably the "Framebuffer with custom ELF headers" (generated binary size is the same as pure assembly, it also allow full controls over the ELF header and other ASM parts)
+
+A good and up to date source for sizecoding on Linux (also show how to output sounds and more): [http://www.sizecoding.org/wiki/Linux](http://www.sizecoding.org/wiki/Linux)
 
 ## Why
 
@@ -52,7 +54,7 @@ applicable to all except C + custom ELF header and ASM version :
 
 Some details / credits about the optimizations can be gathered [here](https://in4k.github.io/wiki/linux)
 
-If the compression / shell script may feel like cheating one can still compile some programs (framebuffer, file) down to less than 256 bytes for file / fbdev output.
+If the compression / shell script may feel like cheating one can still compile some programs (framebuffer, file) down to less than 256 bytes (even 128 bytes) for file / fbdev output.
 
 There is still some room to remove some bytes if one don't care about clearing the terminal output or exiting properly. (~11 bytes to most)
 
@@ -69,7 +71,7 @@ There is also a framebuffer version with GCC output + custom ELF headers merged 
 Several methods are used to output graphics, of which :
 
 * [Portable Pixmap](https://en.wikipedia.org/wiki/Netpbm#File_formats) file output
-* fbdev; framebuffer (eg. `/dev/fb0`)
+* fbdev; framebuffer (eg. `/dev/fb0`), open + mmap OR open + pwrite64 using the stack as buffer (best for realtime / feedback effects)
 * SDL
 * SDL2
 
@@ -81,6 +83,8 @@ Framebuffer / file output is probably the most compatible option followed by SDL
 ## Sound output
 
 There is no sound output on the provided examples but it can be added easily by using `aplay` in the shell script (and piping data to it such as obviously `/dev/random`)
+
+Here is some [code](http://www.sizecoding.org/wiki/Linux)
 
 ### File output
 
@@ -129,14 +133,14 @@ The main advantage over all methods here is : C code + hand made ELF header cust
 
 The main disadvantage is : it can be harder to use since some sections like .rodata are left out so for example any float constants in C code don't work as-is, they must be defined somewhere in the assembly code and referenced in C code through pointers (see sources) **if you only use integers** in your program it should work as-is.
 
-Another (small) disadvantage is less portability.
+Another (small) disadvantage is less portability, you may have to rewrite the header for each platforms.
 
 How ? The program is compiled with GCC (with optimization flags), a binary blob (without headers) is then extracted and included inside a custom ELF header compiled with NASM, the result is then compressed.
 
 There is some potentially unsafe shortcuts compared to others (they are not mandatory) such as :
 
-* ELF padding / ABI target / version field is used to store the framebuffer device (/dev/fb0) string, using the padding field is safe but there is still doubts about the ABI field
-* Syscalls null arguments are discarded (see `fb.c` comments), this rely on the asumption that all registers are set to 0 when the program start.
+* ELF padding / ABI target / version field is used to store the framebuffer device (/dev/fb0) string
+* Syscall null arguments are discarded (see `fb.c` comments), this rely on the asumption that all registers are set to 0 when the program start.
 
 32 bits ELF result (1920x1080) :
 
@@ -180,9 +184,11 @@ Note : Some potentially unsafe tricks can be used to gain ~4 bytes for the 32 bi
 
 Some more bytes can be gained for the 32 bits version by hand coding some stuff in assembly (see next) but at this point it is probably better to go for pure assembly. :)
 
-### Framebuffer with custom ELF headers + fields overlap + x86 framebuffer init
+### Framebuffer with custom ELF headers + fields overlap + x86 framebuffer init (open / mmap)
  
 Same as before except the framebuffer initialization (fopen / mmap calls) is hand coded; 32 bits x86 only
+
+open/mmap disadvantage : reading from the mmaped memory is very slow, can also get tearing and may be hard to do feedback effects, see the pwrite64 below for fixes
 
 32 bits ELF result (1920x1080) :
 
@@ -193,6 +199,25 @@ It use optimized framebuffer initialization code from [lintro](https://www.pouet
 This is probably one of the tiniest a C fbdev program can be although there is still some tricks to gain ~3 bytes such as changing entry point (see [lintro sources](https://www.pouet.net/prod.php?which=58560))
 
 Ideal for 128 bytes intro although at this point it is probably better to ditch C and do pure assembly :)
+
+### Framebuffer with custom ELF headers + fields overlap + x86 framebuffer init (open / pwrite64 + stack usage)
+ 
+Same as before except the framebuffer initialization (fopen / pwrite64 calls) is hand coded and some room is made on the stack for the buffer; 32 bits x86 only
+
+open/pwrite64/stack advantage : fast read, no tearings, allow feedback effects, quite easy to do scrolling and glitchy effects by using the pwrite64 parameters
+open/pwrite64/stack disadvantage : sligthly larger, use the stack as a buffer so if your C program use the stack some data may go into the display buffer, it may crash if you write data that the C program use (can be mitigated with some offset)
+
+Another disadvantage of using the stack is that the stack size is sometimes limited to 8Mb, it is probably safe to hold a 1920x1080 32 bits framebuffer but maybe not more.
+
+note : the pwrite64 is hand coded in the C program because it is easy to embed it into a loop that way (youll have to call it each time you want to draw)
+
+Once again it is probably better to ditch C and do pure assembly at this point :)
+
+32 bits ELF result (1920x1080) :
+
+* **87 bytes**
+
+Idea based on [http://www.sizecoding.org/wiki/Linux](http://www.sizecoding.org/wiki/Linux) there is some more tricks on there!
 
 ### SDL
 
@@ -254,8 +279,12 @@ This is only ~13 bytes less than the C version! (and ~7 bytes if syscall null va
 
 Note : this is the same size as the Framebuffer custom ELF, there is some small size differences due to the added loop.
 
+Conclusion : For 128b / 256b programs GCC can do a sufficient job but it highly depend on the code, GCC may use the stack heavily which is sometimes not good for sizecoding, it will not beat hand optimized assembly which may at least have 25% less size.
+
 ### More
 
-Some more bytes can be gained by tweaking the ELF header (see overlap example), this can be highly tricky / unsafe.
+Some more bytes can be gained by tweaking the ELF header (see overlap example), this can be highly tricky / unsafe. Some more can be gained with compiler options such as `-fomit-frame-pointer` `-march=`; depend on code.
+
+Also highly recommend to disassemble and analyze the resulting binary `objdump -b binary -D -m i386 ../fb_1920x1080x32`, GCC may put some useless setup bits in there just before entering main like some useless `push` (once had 7 bytes gain by looking at that!).
 
 GCC version could also influence the final size (for the examples above recent GCC versions (up to 11) does not affect the binary size)
