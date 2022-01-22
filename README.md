@@ -205,6 +205,7 @@ Ideal for 128 bytes intro although at this point it is probably better to ditch 
 Same as before except the framebuffer initialization (fopen / pwrite64 calls) is hand coded and some room is made on the stack for the buffer; 32 bits x86 only
 
 open/pwrite64/stack advantage : fast read, no tearings, allow feedback effects, quite easy to do scrolling and glitchy effects by using the pwrite64 parameters
+
 open/pwrite64/stack disadvantage : sligthly larger, use the stack as a buffer so if your C program use the stack some data may go into the display buffer, it may crash if you write data that the C program use (can be mitigated with some offset)
 
 Another disadvantage of using the stack is that the stack size is sometimes limited to 8Mb, it is probably safe to hold a 1920x1080 32 bits framebuffer but maybe not more.
