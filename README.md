@@ -7,17 +7,17 @@ The goal was to build a collection of very small standalone Linux graphics progr
 
 The rules was to be able to output & view graphics data, it also should be able to quit properly using Ctrl+C (SIGINT)
 
-All of them compile down to less than 512 bytes with some less than 256 bytes and two (32 bits only) less than 128 bytes (85 bytes !)
+All of them compile down to less than 512 bytes, some are less than 256 bytes and two (32 bits only) less than 128 bytes (80 bytes !)
 
-There is only one 100% assembly framebuffer program to show how all of this compete against pure assembly and 'compliant' ELF [credits](https://www.muppetlabs.com/~breadbox/software/tiny/return42.html)
+There is only one 100% assembly framebuffer program to show how all of this compete against 'compliant' ELF [credits](https://www.muppetlabs.com/~breadbox/software/tiny/return42.html)
 
 It borrow several tricks from several sources mainly coming from the [Demoscene](https://en.wikipedia.org/wiki/Demoscene)
 
-All pure C programs work in either 64 bits or 32 bits (must append `-m32` to GCC flags), 32 bits programs may be bigger or smaller.
+All 100% C programs work in either 64 bits or 32 bits (must append `-m32` to GCC flags), 32 bits vs 64 bits binary size depends on the method but 32 bits is generally smaller.
 
-This was used for [my procedural graphics 128b/256b intro](https://www.pouet.net/groups.php?which=15005) although some are pure assembly.
+This was used for [my procedural graphics 128b/256b intro](https://www.pouet.net/groups.php?which=15005) although some are 100% assembly.
 
-The best method for anything real-time is probably the "Framebuffer with custom ELF headers" (generated binary size is the same as pure assembly, it also allow full controls over the ELF header and other ASM parts)
+The best method for anything real-time is probably the "Framebuffer with custom ELF headers", the binary size is the same as the assembly version, it also allow full controls over the ELF header and ASM parts.
 
 A good and up to date source for sizecoding on Linux (also show how to output sounds and more): [http://www.sizecoding.org/wiki/Linux](http://www.sizecoding.org/wiki/Linux)
 
@@ -27,7 +27,7 @@ Fun, portability, readability, accessibility.
 
 It is mainly targeted at [sizecoding](http://www.sizecoding.org/wiki/Main_Page) stuff. (art of creating very tiny programs)
 
-* Portability : There is some inline assembly but it is still way more portable than pure assembly.
+* Portability : There is some inline assembly but it is still way more portable than an assembly program.
 * Readability : Not always true but generally it is, when doing sizecoding the code can get pretty weird / cryptic, with C it is more straightforward.
 * Accessibility : Allow to get into sizecoding quickly with common programming language.
 
@@ -38,6 +38,8 @@ As a major downside there is less controls over the generated code and maybe som
 Just go into any directory then into `src` directory and type `sh build.sh` this will invoke `make` multiple times for all defined width / height parameters in `build.sh` then all generated executables will go into the upper directory.
 
 This was built with **GCC 7.5.0**
+
+**NOTE : If you get crashes try to build the program a second time; due to unsolved issues in the build process when switching target.**
 
 ## How
 
@@ -56,11 +58,11 @@ Some details / credits about the optimizations can be gathered [here](https://in
 
 If the compression / shell script may feel like cheating one can still compile some programs (framebuffer, file) down to less than 256 bytes (even 128 bytes) for file / fbdev output.
 
-There is still some room to remove some bytes if one don't care about clearing the terminal output or exiting properly. (~11 bytes to most)
+There is still some room to remove some bytes by not clearing the terminal output or not exiting properly. (~11 bytes to most)
 
 There is also the `-march=` GCC option which can have varying result on binary size.
 
-When compressed changing some constants can sometimes lead to some gain (depend on content), for example switching some fields of the ELF header to 0 can lead to ~8 bytes gain, this may be no more ELF compliant though.
+When compression is used changing some constants can sometimes lead to some gain. (depends on executable content)
 
 `strace` is usefull on optimized binary to see any problems with the syscall
 
@@ -122,7 +124,7 @@ The generated binary res / bit depth should match the framebuffer settings in or
 
 Note : 
 
-* 176 bytes by removing null syscall parameters, this is probably safe on x86-64 but i don't know if it is safe for x86 platforms so i let that out.
+* 176 bytes by removing null syscall parameters, this is probably safe on x86-64 but i don't know if it is safe for x86 platforms so i left that out.
 * for static graphics (procedural) some bytes can be gained by using a static buffer + call to single write syscall + adjusting the shell script to output to /dev/fb0 just like the "file output" example
 
 ### Framebuffer with custom 32 / 64 bits ELF headers
@@ -131,13 +133,13 @@ Same as before with a custom 32 / 64 bits assembly ELF header, probably the best
 
 The main advantage over all methods here is : C code + hand made ELF header customizations / complete controls
 
-The main disadvantage is : it can be harder to use since some sections like .rodata are left out so for example any float constants in C code don't work as-is, they must be defined somewhere in the assembly code and referenced in C code through pointers (see sources) **if you only use integers** in your program it should work as-is.
+The main disadvantage is : it can be harder to use since some sections like .rodata are left out so for example any float constants in C code don't work as-is, they must be defined somewhere in the assembly code and referenced in C code through pointers (see sources) **if you only use integers** in your program it should work as-is so [fixed-point arithmetic](https://en.wikipedia.org/wiki/Fixed-point_arithmetic) should perhaps be prefered over floats.
 
 Another (small) disadvantage is less portability, you may have to rewrite the header for each platforms.
 
-How ? The program is compiled with GCC (with optimization flags), a binary blob (without headers) is then extracted and included inside a custom ELF header compiled with NASM, the result is then compressed.
+How ? The program is compiled with GCC (with optimization flags), a binary blob (without headers) is then extracted and included inside a custom ELF header assembled with NASM, the result is then compressed.
 
-There is some potentially unsafe shortcuts compared to others (they are not mandatory) such as :
+There is some unsafe shortcuts (perhaps) compared to the other methods such as :
 
 * ELF padding / ABI target / version field is used to store the framebuffer device (/dev/fb0) string
 * Syscall null arguments are discarded (see `fb.c` comments), this rely on the asumption that all registers are set to 0 when the program start.
@@ -152,7 +154,7 @@ There is some potentially unsafe shortcuts compared to others (they are not mand
 * 171 bytes optimized
 * 164 bytes optimized + compressed (153 bytes if the console isn't cleared / program doesn't exit properly)
 
-Original idea / implementation come from [this article](http://mainisusuallyafunction.blogspot.com/2015/01/151-byte-static-linux-binary-in-rust.html)
+Original idea / implementation came from [this article](http://mainisusuallyafunction.blogspot.com/2015/01/151-byte-static-linux-binary-in-rust.html)
 
 Note : Non compressed version does not quit properly
 
@@ -178,7 +180,7 @@ Note : 32 bits version goes further than just overlapping headers by integrating
 * 140 bytes optimized
 * 159 bytes optimized + compressed (148 bytes if the console isn't cleared / program doesn't exit properly)
 
-Compression does not seem to help anymore so it is disabled by default. (see `Makefile` to enable it)
+Compression does not seem to help anymore so it is disabled by default.
 
 Note : Some potentially unsafe tricks can be used to gain ~4 bytes for the 32 bits ELF by tweaking the `sys_mmap` function (no push / pop + single movl and one arg) bringing the 32 bits ELF to around **123 bytes**
 
@@ -192,7 +194,7 @@ open/mmap disadvantage : reading from the mmaped memory is very slow, can also g
 
 32 bits ELF result (1920x1080) :
 
-* **85 bytes**
+* **80 bytes**
 
 It use optimized framebuffer initialization code from [lintro](https://www.pouet.net/prod.php?which=58560) a 128 bytes intro by frag/fsqrt
 
@@ -284,9 +286,11 @@ Note : this is the same size as the Framebuffer custom ELF, there is some small 
 
 Conclusion : For 128b / 256b programs GCC can do a sufficient job but it highly depend on the code, GCC may use the stack heavily which is sometimes not good for sizecoding, it will not beat hand optimized assembly which may at least have 25% less bytes.
 
-### More
+### More tricks
 
 Some more bytes can be gained by tweaking the ELF header (see overlap example), this can be highly tricky / unsafe. Some more can be gained with compiler options such as `-fomit-frame-pointer` `-march=`; depend on code.
+
+GCC option `-ffixed-reg` where 'reg' is a register name can be used to tell GCC to avoid generating code with this register, this may be useful in some cases.
 
 Also highly recommend to disassemble and analyze the resulting binary `objdump -b binary -D -m i386 ../fb_1920x1080x32`, GCC may put some useless setup bits (for stack alignment etc.) in there just before entering main like some useless `push` (once had 7 bytes gain by looking at that!).
 

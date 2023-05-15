@@ -15,19 +15,19 @@ ehdr:
     dd  entry       ; e_entry
 phdr:
     dd	1			; p_type
-	dd	phdr - $$	; e_phoff	; p_flags
-	dd	0			; p_offset
-	dd	0			; e_shoff
-	dq	$$			; p_vaddr
-	; e_flags
-	dw	0x40		; e_ehsize	; p_paddr
-	dw	0x38		; e_phentsize
-	dw	1			; e_phnum
-	dw	0			; e_shentsize
-	dq	filesize	; e_shnum	; p_filesz
-	; e_shstrndx
-	dq	filesize	; p_memsz
-	dq	0x00200000	; p_align
+    dd	phdr - $$	; e_phoff	; p_flags
+    dd	0			; p_offset
+    dd	0			; e_shoff
+    dq	$$			; p_vaddr
+    ; e_flags
+    dw	0x40		; e_ehsize	; p_paddr
+    dw	0x38		; e_phentsize
+    dw	1			; e_phnum
+    dw	0			; e_shentsize
+    dq	filesize	; e_shnum	; p_filesz
+    ; e_shstrndx
+    dq	filesize	; p_memsz
+    dq	0x00200000	; p_align
 
 
 ; any data can also go here and are accessible in the C code through pointers but the 'entry' should be correcty updated (see Makefile) so it must have an offset added corresponding to the size of the data

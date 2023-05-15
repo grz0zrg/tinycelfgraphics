@@ -22,11 +22,4 @@ void _start() {
     unsigned int index = x + y * WIDTH;
 
     buffer[index] = 0xffffff; // white
-
-    // note for float : if you use float constants in your C code, youll most likely want to load the data through pointers address (see below)
-    //                  because float constants are loaded from memory and since we don't keep sections any float constants will vanish from the resulting binary
-    //                  unless they are defined in elf64.s or elf32.s (just before the payload) and referenced via pointers in the C code, this allow even more fine controls over the data
-    // Example (note : you must uncomment the constant definition line in elf64.s / elf32.s and add an offset of 4 in the Makefile) :
-    // note : this is for 64 bits, the address must be changed for 32 bits
-    // float my_float_constant = *(float*)0x100000054;
 }

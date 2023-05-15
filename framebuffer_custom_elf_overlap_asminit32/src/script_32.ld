@@ -1,7 +1,7 @@
 SECTIONS {
-    . = 0x0001002E;
+    . = 0x00010029;
   
-    combined . : AT(0x0001002E) ALIGN(1) SUBALIGN(1) {
+    combined . : AT(0x00010029) ALIGN(1) SUBALIGN(1) {
         *(.text*)
         *(.data*)
         *(.rodata*)

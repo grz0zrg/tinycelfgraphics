@@ -51,7 +51,7 @@ inline static unsigned int *sys_mmap(unsigned int *addr, unsigned long length, u
 }
 void _start() {
 #ifdef __i386__
-    // 0x0001000E : see elf32.s (this is /dev/fb0 string address)
+    // 0x00010020 : see elf32.s (this is /dev/fb0 string address)
     int fbfd = sys_open((char *)0x00010020, O_RDWR, 0);
 #else
     // 0x100000007 : see elf64.s (this is /dev/fb0 string address packed in the ELF padding / ABI field)
@@ -69,7 +69,7 @@ void _start() {
     // note for float : if you use float constants in your C code, youll most likely want to load the data through pointers address (see below)
     //                  because float constants are loaded from memory and since we don't keep sections any float constants will vanish from the resulting binary
     //                  unless they are defined in elf64.s or elf32.s (just before the payload) and referenced via pointers in the C code, this allow even more fine controls over the data
-    // Example (note : you must uncomment the constant definition line in elf64.s / elf32.s and add an offset of 4 in the Makefile) :
+    // Example (note : you must uncomment the constant definition line in elf64.s / elf32.s and add an offset of 4 in the Makefile / linker file (.ld) for the entry point address) :
     // note : this is for 64 bits, the address must be changed for 32 bits
     // float my_float_constant = *(float*)0x100000054;
 }
