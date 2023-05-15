@@ -17,7 +17,7 @@ LZMA_ARGS=--format=lzma -9 --extreme --lzma1=preset=9,lc=0,lp=0,pb=0,nice=32,dep
 
 all:
 	$(CC) -o $(NAME) $(NAME).c -DWIDTH=$(WIDTH) -DHEIGHT=$(HEIGHT) $(STANDARD_FLAGS) $(OPTI_FLAGS) `pkg-config clutter-1.0 --cflags --libs` $(LINKER_FLAGS)
-	strip -R .note -R .data -R .rodata -R .bss -R .comment -R .eh_frame -R .eh_frame_hdr -R .note.gnu.build-id -R .got -R .got.plt -R .gnu.version -R .rela.dyn -R .shstrtab -R .gnu.hash $(NAME)
+	strip -R .note -R .data -R .bss -R .comment -R .eh_frame -R .eh_frame_hdr -R .note.gnu.build-id -R .got -R .got.plt -R .gnu.version -R .rela.dyn -R .shstrtab -R .gnu.hash $(NAME)
 	$(SSTRIP) -z $(NAME)
 	# clear useless bits (taken from blackle Tiny X11 Trans Flag)
 	sed -i 's/_edata/\x00\x00\x00\x00\x00\x00/g' $(NAME);
@@ -32,7 +32,7 @@ all:
 	rm $(NAME).lzma
 	# remove CRC32 (4 bytes)
 	truncate -s -4 $(NAME)
-	# truncate some more bytes (NOTE : unsafe, upon any segfaults just comment the next line)
-	truncate -s -1 $(NAME)
+	# truncate some more bytes (NOTE : may works but unsafe)
+	#truncate -s -1 $(NAME)
 	wc -c $(NAME)
 	mv $(NAME) ../$(NAME)_$(WIDTH)x$(HEIGHT)x32

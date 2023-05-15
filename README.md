@@ -48,7 +48,7 @@ applicable to all except C + custom ELF header and ASM version :
 * usage of [strip](https://en.wikipedia.org/wiki/Strip_(Unix)) to remove various useless stuff from the executable binary (symbols, debug data etc.)
 * usage of [sstrip](https://www.muppetlabs.com/~breadbox/software/elfkickers.html) to remove even more useless stuff that strip doesn't (section headers)
 * clean more useless bits from the executable with a sed pass [from blackle](https://github.com/blackle/Tiny-X11-Trans-Flag)
-* compress the ELF binary with LZMA (Note: this step + next step of course rely on some tools like **lzcat** **sed** which must be available on the OS; this is generally not an issue as they are available by defaults on most Linux OS)
+* compress the ELF binary with LZMA (Note: this step + next step of course rely on some tools like **lzcat** **sed** which must be available on the OS; this is generally not an issue as they are available by default on most Linux OS)
 * build a binary from a small shell script + the compressed binary, the shell script unpack and run itself, it unpack the executable to `/tmp/g`, make it executable and may perform additional stuff (such as outputting audio, clearing the terminal, exiting properly etc.)
 * truncate some bytes left from the compression format (CRC32 checksum)
 
@@ -58,7 +58,7 @@ If the compression / shell script may feel like cheating one can still compile s
 
 There is still some room to remove some bytes if one don't care about clearing the terminal output or exiting properly. (~11 bytes to most)
 
-There is also the `-march=` GCC option which can have varying result with ~2 bytes gain.
+There is also the `-march=` GCC option which can have varying result on binary size.
 
 When compressed changing some constants can sometimes lead to some gain (depend on content), for example switching some fields of the ELF header to 0 can lead to ~8 bytes gain, this may be no more ELF compliant though.
 
@@ -252,14 +252,16 @@ Unless the SDL version this one doesn't seem to require any additional setup to 
 
 ### Clutter (accelerated)
 
-This use the Clutter libary to output graphics data through a GLSL fragment shader. (white screen)
+This use the Clutter libary to output graphics data through a GLSL fragment shader. (a window filled with red)
+
+The Clutter package should be installed in popular distributions, if not the package to install on Ubuntu is : `sudo apt install libclutter-1.0-dev`
 
 64 bits ELF result :
 
-* 1409 bytes optimized
-* 464 bytes optimized + compressed
+* 1417 bytes optimized
+* 503 bytes optimized + compressed
 
-For anything 'modern' this is probably the best choice as it is accelerated. There is probably not enough room for anything complex in 512 bytes (at least on 64 bits) because Clutter GLSL symbols are long named.
+Probably the best choice for "modern" graphics as it is accelerated. There is probably not enough room for anything complex in 512 bytes (at least on 64 bits) because Clutter GLSL symbols are long named.
 
 Didn't try the 32 bits version but this probably save some more bytes.
 
@@ -286,6 +288,6 @@ Conclusion : For 128b / 256b programs GCC can do a sufficient job but it highly 
 
 Some more bytes can be gained by tweaking the ELF header (see overlap example), this can be highly tricky / unsafe. Some more can be gained with compiler options such as `-fomit-frame-pointer` `-march=`; depend on code.
 
-Also highly recommend to disassemble and analyze the resulting binary `objdump -b binary -D -m i386 ../fb_1920x1080x32`, GCC may put some useless setup bits in there just before entering main like some useless `push` (once had 7 bytes gain by looking at that!).
+Also highly recommend to disassemble and analyze the resulting binary `objdump -b binary -D -m i386 ../fb_1920x1080x32`, GCC may put some useless setup bits (for stack alignment etc.) in there just before entering main like some useless `push` (once had 7 bytes gain by looking at that!).
 
-GCC version could also influence the final size (for the examples above recent GCC versions (up to 11) does not affect the binary size)
+GCC version can also influence the binary size, Clutter sample for instance has some bytes difference between GCC 7, 8 and 12. On GCC-12 the `-Oz` option is available and may help to get some more bytes.
